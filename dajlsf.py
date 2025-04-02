@@ -3,7 +3,6 @@ import sqlite3
 from datetime import datetime
 import pandas as pd
 import uuid
-import zipfile
 import io
 
 # 데이터베이스 초기화
@@ -53,23 +52,15 @@ def get_petitions(order_by='date'):
         c.execute('SELECT * FROM petitions ORDER BY date DESC')
     return c.fetchall()
 
-# DB 다운로드 버튼 추가 (비밀번호 설정 ZIP)
+# DB 다운로드 버튼 추가
 def download_db():
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, 'w') as zf:
-        # DB 파일을 ZIP에 추가
-        with open('petitions.db', 'rb') as db_file:
-            zf.writestr('petitions.db', db_file.read())
-        # 비밀번호 설정 (777)
-        zf.setpassword(b'777')
-    buffer.seek(0)
-    
-    st.download_button(
-        label="📂 DB 파일 다운로드",
-        data=buffer,
-        file_name="petitions.zip",
-        mime="application/zip"
-    )
+    with open("petitions.db", "rb") as file:
+        st.download_button(
+            label="📂 DB 파일 다운로드",
+            data=file,
+            file_name="petitions.db",
+            mime="application/octet-stream"
+        )
 
 # 사용자 고유 ID 생성
 def get_user_id():
@@ -78,11 +69,13 @@ def get_user_id():
     return st.session_state["user_id"]
 
 # Streamlit 애플리케이션
-st.title("📢 동탄국제고 공개청원페이지")
+st.title("📢 공개 청원 작성 및 좋아요 사이트")
 
+# 사이드바 메뉴
 menu = ["청원 작성", "청원 목록", "DB 다운로드"]
 choice = st.sidebar.selectbox("메뉴", menu)
 
+# 청원 작성 페이지
 if choice == "청원 작성":
     st.header("✏️ 새로운 청원 작성하기")
     title = st.text_input("청원 제목")
@@ -95,6 +88,7 @@ if choice == "청원 작성":
         else:
             st.error("❗ 제목, 내용, 이메일을 모두 입력해주세요.")
 
+# 청원 목록 페이지
 elif choice == "청원 목록":
     st.header("📄 등록된 청원 목록")
     order_by = st.selectbox("정렬 기준", ["최신순", "좋아요순"])
@@ -111,8 +105,15 @@ elif choice == "청원 목록":
             else:
                 st.warning("⚠️ 이미 좋아요를 눌렀습니다.")
 
+# DB 다운로드 페이지
 elif choice == "DB 다운로드":
-    st.header("💾 DB 파일 다운로드")
-    download_db()
+    st.header("🔒 DB 다운로드 접근 제한")
+    password = st.text_input("비밀번호를 입력하세요", type="password")
+    if st.button("확인"):
+        if password == "777":
+            st.success("✅ 비밀번호 인증 성공! DB 다운로드 가능")
+            download_db()
+        else:
+            st.error("❌ 비밀번호가 틀렸습니다!")
 
 
