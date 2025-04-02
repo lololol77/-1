@@ -82,3 +82,4 @@ elif choice == "청원 목록":
                 st.success("좋아요를 눌렀습니다!")
             else:
                 st.warning("이미 좋아요를 눌렀습니다.")
+
