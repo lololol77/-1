@@ -78,7 +78,7 @@ def get_user_id():
     return st.session_state["user_id"]
 
 # Streamlit 애플리케이션
-st.title("📢 동탄국제고 학생 공개청원페이지")
+st.title("📢 동탄국제고 공개청원페이지")
 
 menu = ["청원 작성", "청원 목록", "DB 다운로드"]
 choice = st.sidebar.selectbox("메뉴", menu)
