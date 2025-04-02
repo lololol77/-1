@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 from datetime import datetime
 import pandas as pd
+import uuid
 
 # 데이터베이스 초기화
 conn = sqlite3.connect('petitions.db', check_same_thread=False)
@@ -21,6 +22,12 @@ c.execute('''CREATE TABLE IF NOT EXISTS likes (
     UNIQUE(petition_id, user_id)
 )''')
 conn.commit()
+
+# 세션 상태에 사용자 ID 설정
+def get_user_id():
+    if 'user_id' not in st.session_state:
+        st.session_state['user_id'] = str(uuid.uuid4())
+    return st.session_state['user_id']
 
 # 청원 등록 함수
 def add_petition(title, content, email):
@@ -71,7 +78,7 @@ elif choice == "청원 목록":
     st.header("등록된 청원 목록")
     order_by = st.selectbox("정렬 기준", ["최신순", "좋아요순"])
     petitions = get_petitions(order_by='likes' if order_by == "좋아요순" else 'date')
-    user_id = st.session_state.get("user_id", str(st.session_state.session_id))
+    user_id = get_user_id()
 
     for petition in petitions:
         st.subheader(petition[1])
@@ -82,4 +89,5 @@ elif choice == "청원 목록":
                 st.success("좋아요를 눌렀습니다!")
             else:
                 st.warning("이미 좋아요를 눌렀습니다.")
+
 
